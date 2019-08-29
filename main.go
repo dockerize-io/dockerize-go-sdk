@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 )
-import "github.com/kostyashevchuk/dockerify"
+import "github.com/kostyashevchuk/dockerify/Swagger"
 
 func main() {
 	fmt.Print("Hello")
