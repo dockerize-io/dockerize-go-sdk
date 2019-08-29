@@ -14,6 +14,6 @@ help:
 SWAGGER_YML=swagger.yaml
 
 generate-client: ## [SWAGGER] Generate swagger binary
-	oapi-codegen $(SWAGGER_YML) -generate client  > client.go
+	oapi-codegen $(SWAGGER_YML) -generate client  > Swagger/client.go
 
 build: generate-client
