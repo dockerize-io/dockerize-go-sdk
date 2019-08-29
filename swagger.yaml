@@ -1,0 +1,796 @@
+openapi: 3.0.1
+info:
+    title: Dockerify deployments management API
+    version: 1.0.0
+servers:
+    - url: /
+tags:
+    - name: 'user'
+      description: 'Api for user'
+paths:
+    /v1/dockerCredentials:
+        get:
+            tags:
+                - 'user'
+            summary: Returns docker login credentials
+            description: Execute `docker login [repo]` with your login and password
+            operationId: getDockerCredentials
+            responses:
+                200:
+                    description: Information for docker login
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/dockerCredentials'
+            x-swagger-router-controller: index
+    /v1/cert:
+        post:
+            tags:
+                - 'user'
+            summary: Create certificate in app
+            operationId: createCert
+            requestBody:
+                x-name: body
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/body_cert'
+            responses:
+                200:
+                    description: Certificate created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/success'
+                400:
+                    description: Invalid input
+                404:
+                    description: App not found
+            x-swagger-router-controller: index
+    /v1/apps/{appName}/status:
+        get:
+            tags:
+                - 'user'
+            summary: Get status of pods and certificates
+            operationId: getAppStatus
+            parameters:
+                - name: appName
+                  in: path
+                  description: App deployment name
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/appName'
+            responses:
+                200:
+                    description: Get app status
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/appStatus'
+                400:
+                    description: Invalid input
+                404:
+                    description: App not found
+            x-swagger-router-controller: index
+    /v1/apps/{appName}/logs:
+        get:
+            tags:
+                - 'user'
+            summary: Get last docker container deployment logs
+            operationId: getAppLogs
+            parameters:
+                - name: appName
+                  in: path
+                  description: App deployment name
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/appName'
+            responses:
+                200:
+                    description: Get app logs
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                  type: string
+                                  example: ['app logs']
+                400:
+                    description: Invalid input
+                404:
+                    description: App not found
+            x-swagger-router-controller: index
+    /v1/apps/{appName}:
+        get:
+            tags:
+                - 'user'
+            summary: Get one docker container deployment
+            operationId: getApp
+            parameters:
+                - name: appName
+                  in: path
+                  description: App deployment name
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/appName'
+            responses:
+                200:
+                    description: 'Get app'
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    app:
+                                        $ref: '#/components/schemas/App'
+                400:
+                    description: Invalid input
+                404:
+                    description: App not found
+            x-swagger-router-controller: index
+        put:
+            tags:
+                - 'user'
+            summary: Updates docker container deployment
+            operationId: updateApp
+            parameters:
+                - name: appName
+                  in: path
+                  description: App deployment name
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/appName'
+            requestBody:
+                x-name: body
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/body'
+                required: true
+            responses:
+                200:
+                    description: App updated
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/success'
+                400:
+                    description: Invalid input
+                404:
+                    description: App not found
+            x-swagger-router-controller: index
+        delete:
+            tags:
+                - 'user'
+            summary: Delete one docker container deployment
+            operationId: deleteApp
+            parameters:
+                - name: appName
+                  in: path
+                  description: App deployment name
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/appName'
+            responses:
+                200:
+                    description: 'App deleted'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/success'
+                400:
+                    description: Invalid input
+                404:
+                    description: App not found
+            x-swagger-router-controller: index
+    /v1/apps:
+        get:
+            tags:
+                - 'user'
+            summary: Get all docker container deployments
+            operationId: getAllApps
+            responses:
+                200:
+                    description: 'Get all apps'
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    apps:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/App'
+                                        x-content-type: application/json
+            x-swagger-router-controller: index
+        post:
+            tags:
+                - 'user'
+            summary: Create a new docker container deployment
+            operationId: createApp
+            requestBody:
+                x-name: body
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/body_1'
+            responses:
+                201:
+                    description: App created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/createApp'
+                400:
+                    description: Invalid input
+                404:
+                    description: App not found
+            x-swagger-router-controller: index
+    /v1/apps/{appName}/release:
+        post:
+            tags:
+                - 'user'
+            summary: Release one deployment
+            operationId: releaseApp
+            parameters:
+                - name: appName
+                  in: path
+                  description: App deployment name
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/appName'
+            responses:
+                200:
+                    description: Release app
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/success'
+                400:
+                    description: Invalid input
+                404:
+                    description: App not found
+            x-swagger-router-controller: index
+    /v1/apps/{appName}/{minutesBehind}/{step}/memory:
+        get:
+            tags:
+                - 'user'
+            summary: Get pod memory usage in bytes
+            operationId: getAppMemoryUsage
+            parameters:
+                - name: appName
+                  in: path
+                  description: App name
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/appName'
+                - name: minutesBehind
+                  in: path
+                  description: Minutes behind
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/minutesBehind'
+                - name: step
+                  in: path
+                  description: Step in minutes
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/step'
+            responses:
+                200:
+                    description: 'Get values'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/values'
+                                x-content-type: application/json
+                400:
+                    description: Invalid input
+                404:
+                    description: Pod not found
+            x-swagger-router-controller: index
+    /v1/apps/{appName}/{minutesBehind}/{step}/cpu:
+        get:
+            tags:
+                - 'user'
+            summary: Get pod cpu usage
+            operationId: getAppCpuUsage
+            parameters:
+                - name: appName
+                  in: path
+                  description: App name
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/appName'
+                - name: minutesBehind
+                  in: path
+                  description: Minutes behind
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/minutesBehind'
+                - name: step
+                  in: path
+                  description: Step in minutes
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/step'
+            responses:
+                200:
+                    description: 'Get values'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/values'
+                                x-content-type: application/json
+                400:
+                    description: Invalid input
+                404:
+                    description: Pod not found
+            x-swagger-router-controller: index
+    /v1/apps/{appName}/env:
+        put:
+            tags:
+                - 'user'
+            summary: Update env in app
+            operationId: updateAppEnv
+            parameters:
+                - name: appName
+                  in: path
+                  description: App deployment name
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/appName'
+            requestBody:
+                x-name: body
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/body_env'
+            responses:
+                200:
+                    description: Env updated
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/success'
+                400:
+                    description: Invalid input
+                404:
+                    description: App not found
+            x-swagger-router-controller: index
+        get:
+            tags:
+                - 'user'
+            summary: Get env of app
+            operationId: getAppEnv
+            parameters:
+                - name: appName
+                  in: path
+                  description: App deployment name
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/appName'
+            responses:
+                200:
+                    description: Env app
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Env'
+                                    x-content-type: application/json
+                400:
+                    description: Invalid input
+                404:
+                    description: App not found
+            x-swagger-router-controller: index
+    /v1/apps/{appName}/volumes:
+        post:
+            tags:
+                - 'user'
+            summary: Create volumes in app
+            operationId: createAppVolumes
+            parameters:
+                - name: appName
+                  in: path
+                  description: App deployment name
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/appName'
+            requestBody:
+                x-name: body
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/volume'
+            responses:
+                200:
+                    description: Volumes created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/success'
+                400:
+                    description: Invalid input
+                404:
+                    description: App not found
+            x-swagger-router-controller: index
+        get:
+            tags:
+                - 'user'
+            summary: Get volumes of app
+            operationId: getAppVolumes
+            parameters:
+                - name: appName
+                  in: path
+                  description: App deployment name
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/appName'
+            responses:
+                200:
+                    description: Volumes app
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    volumes:
+                                        $ref: '#/components/schemas/volumes'
+                400:
+                    description: Invalid input
+                404:
+                    description: App not found
+            x-swagger-router-controller: index
+    /v1/apps/{appName}/volumes/{volumeName}:
+        delete:
+            tags:
+                - 'user'
+            summary: Delete volume of app
+            operationId: deleteAppVolume
+            parameters:
+                - name: appName
+                  in: path
+                  description: App deployment name
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/appName'
+                - name: volumeName
+                  in: path
+                  description: Volume name
+                  required: true
+                  style: simple
+                  explode: false
+                  schema:
+                      $ref: '#/components/schemas/volumeName'
+            responses:
+                200:
+                    description: Volume deleted
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/success'
+                400:
+                    description: Invalid input
+                404:
+                    description: App not found
+            x-swagger-router-controller: index
+components:
+
+    schemas:
+        httpPort:
+            type: integer
+            format: int64
+            maximum: 65535
+            minimum: 1
+            example: 8080
+        type:
+            type: string
+            example: cloudflare-single
+            enum:
+                - cloudflare-single
+        email:
+            type: string
+            format: email
+            example: foo@example.com
+        apiKey:
+            type: string
+            example: 05m3f272df991df605fgffb17cfeg3n165c99
+        podSize:
+            type: string
+            example: 1X
+            enum:
+                - dev
+                - 1X
+                - 2X
+                - 4X
+                - 16X
+        volumes:
+            type: array
+            items:
+                $ref: '#/components/schemas/volumeGet'
+        volume:
+            type: object
+            properties:
+                path:
+                    type: string
+                    example: '/var/data'
+                    pattern: '^\/([A-z0-9-_+.]+\/?)*$'
+                sizeGB:
+                    type: integer
+                    example: 10
+                    maximum: 10
+                    minimum: 10
+                class:
+                    type: string
+                    enum:
+                        - ceph
+        volumeGet:
+            type: object
+            properties:
+                name:
+                    $ref: '#/components/schemas/volumeName'
+                path:
+                    type: string
+                    example: '/var/data'
+                sizeGB:
+                    type: integer
+                    example: 10
+                class:
+                    type: string
+                    example: ceph
+        maxScaling:
+            maximum: 10
+            minimum: 1
+            type: integer
+            example: 3
+        minScaling:
+            maximum: 10
+            minimum: 1
+            type: integer
+            example: 1
+        customDomain:
+            type: string
+            format: hostname
+            example: hello.example.com
+        appName:
+            type: string
+            example: lucky-goblin-812
+        volumeName:
+            type: string
+            example: var-data-lucky-goblin-812-ceph
+        serviceUrl:
+            type: string
+            example: 'lucky-goblin-812.mr-robot-2000.svc.cluster.local:8000'
+        dockerImage:
+            type: string
+            example: reg.dockerize.io/mr-robot-2000/lucky-goblin-812
+        username:
+            type: string
+            example: mr-robot-2000
+        allowSurge:
+            type: boolean
+            example: true
+        minutesBehind:
+            type: integer
+            format: int64
+            maximum: 2880
+            minimum: 1
+            example: 60
+        step:
+            type: integer
+            format: int64
+            maximum: 60
+            minimum: 1
+            example: 1
+        podStatus:
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: lucky-goblin-812-67d5fb467b-nwth8
+                status:
+                    type: string
+                    example: Running
+                created:
+                    type: string
+                    example: '2019-08-27T07:26:46Z'
+        certStatus:
+            type: object
+            properties:
+                domain:
+                    type: string
+                    example: custom-domain.example.com
+                status:
+                    type: string
+                    example: Ready
+                ready:
+                    type: string
+                    example: 'True'
+        success:
+            type: object
+            properties:
+                success:
+                    type: boolean
+            example:
+                success: true
+        createApp:
+            type: object
+            properties:
+                name:
+                    $ref: '#/components/schemas/appName'
+        Env:
+            type: object
+            properties:
+                name:
+                    type: string
+                value:
+                    type: string
+            example:
+                name: REDIS_PASSWORD
+                value: hello
+        values:
+            type: array
+            items:
+                type: array
+                items:
+                  type: string
+                  example: [1563532839.291, '65658880']
+        App:
+            type: object
+            properties:
+                httpPort:
+                    $ref: '#/components/schemas/httpPort'
+                podSize:
+                    $ref: '#/components/schemas/podSize'
+                minScaling:
+                    $ref: '#/components/schemas/minScaling'
+                maxScaling:
+                    $ref: '#/components/schemas/maxScaling'
+                name:
+                    $ref: '#/components/schemas/appName'
+                dockerImage:
+                    $ref: '#/components/schemas/dockerImage'
+                customDomain:
+                    $ref: '#/components/schemas/customDomain'
+                serviceUrl:
+                    $ref: '#/components/schemas/serviceUrl'
+                url:
+                    type: string
+                allowSurge:
+                    $ref: '#/components/schemas/allowSurge'
+            example:
+                httpPort: 8080
+                podSize: S
+                minScaling: 1
+                maxScaling: 3
+                name: lucky-goblin-812
+                dockerImage: reg.dockerize.io/mr-robot-2000/lucky-goblin-812
+                customDomain: hello.example.com
+                serviceUrl: lucky-goblin-812.mr-robot-2000.svc.cluster.local:8000
+                url: https://lucky-goblin-812.on.dockerify.dev/
+                allowSurge: true
+        appStatus:
+            type: object
+            properties:
+                pods:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/podStatus'
+                certs:
+                    type: object
+                    properties:
+                        customDomain:
+                            $ref: '#/components/schemas/certStatus'
+        dockerCredentials:
+            type: object
+            properties:
+                login:
+                    $ref: '#/components/schemas/username'
+                password:
+                    type: string
+                repo:
+                    type: string
+                cliCommand:
+                    type: string
+            example:
+                password: 89bg662r3
+                repo: reg.dockerize.io
+                login: mr-robot-2000
+                cliCommand: docker login -u mr-robot-2000 -p 89bg662r3 reg.dockerize.io
+        body:
+            type: object
+            properties:
+                httpPort:
+                    $ref: '#/components/schemas/httpPort'
+                podSize:
+                    $ref: '#/components/schemas/podSize'
+                minScaling:
+                    $ref: '#/components/schemas/minScaling'
+                maxScaling:
+                    $ref: '#/components/schemas/maxScaling'
+                customDomain:
+                    $ref: '#/components/schemas/customDomain'
+                dockerImage:
+                    $ref: '#/components/schemas/dockerImage'
+                allowSurge:
+                    $ref: '#/components/schemas/allowSurge'
+            example:
+                httpPort: 8080
+                podSize: 1X
+                minScaling: 1
+                maxScaling: 3
+                allowSurge: true
+        body_env:
+            type: object
+            minProperties: 1
+            maxProperties: 10
+            properties:
+                REDIS_PASSWORD:
+                    type: string
+                    example: hello
+        body_cert:
+            type: object
+            properties:
+                type:
+                    $ref: '#/components/schemas/type'
+                email:
+                    $ref: '#/components/schemas/email'
+                apiKey:
+                    $ref: '#/components/schemas/apiKey'
+                domain:
+                    $ref: '#/components/schemas/customDomain'
+            required:
+                - type
+                - email
+                - apiKey
+                - domain
+        body_1:
+            required:
+                - httpPort
+            properties:
+                httpPort:
+                    $ref: '#/components/schemas/httpPort'
+                name:
+                    $ref: '#/components/schemas/appName'
+security:
+    - bearerAuth: []
