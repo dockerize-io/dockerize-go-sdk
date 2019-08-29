@@ -1,3 +1,9 @@
+First install 
+
+```
+    go get github.com/deepmap/oapi-codegen/cmd/oapi-codegen
+```
+
 To generate new client use command
 
 ```
