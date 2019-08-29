@@ -13,7 +13,9 @@ help:
 
 SWAGGER_YML=swagger.yaml
 
-generate-client: ## [SWAGGER] Generate swagger binary
+generate-client: ## Generate swagger client
 	oapi-codegen $(SWAGGER_YML) -generate client  > Swagger/client.go
+patch-generated-file: ## Patch generated file
+	sed -i '' 's|echo/v4|echo|g' Swagger/client.go
 
-build: generate-client
+build: generate-client patch-generated-file
